@@ -1,1 +1,2 @@
-# klaytn-plus-game
+# addition-game-starter
+Klaytn javascript native boilerplate
