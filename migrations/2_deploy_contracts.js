@@ -5,7 +5,8 @@ module.exports = function (deployer) {
   deployer.deploy(AdditionGame)
     .then(() => {
       if (AdditionGame._json) {
-        fs.writeFile('deployedABI', JSON.stringify(AdditionGame._json.ABI),
+        console.log(AdditionGame._json);
+        fs.writeFile('deployedABI', JSON.stringify(AdditionGame._json.abi),
           (err) => {
             if (err) throw err;
             console.log('ABI 입력 성공');
