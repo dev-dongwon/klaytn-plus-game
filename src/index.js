@@ -1,12 +1,39 @@
+import Cave from "caver-js";
+
+const config = {
+  rpcURL: "http://api.baobab.klaytn.net:8651"
+}
+
+const cav = new Cave(config.rpcURL);
 
 const App = {
+  auth: {
+    accessType: "keystore",
+    keystore: '',
+    password: ''
+  },
 
   start: async function () {
 
   },
 
   handleImport: async function () {
-
+    const fileReader = new FileReader();
+    fileReader.readAsText(event.target.files[0]);
+    fileReader.onload = (event) => {
+      try {
+        if (!this.checkValidKeystore(event.target.result)) {
+          $('#message').text('유효하지 않은 keystore 파일입니다');
+          return;
+        }
+        this.auth.keystore = event.target.result;
+        $('#message').text('keystore 통과. 비밀번호를 입력하세요');
+        document.querySelector('#input-password').focus();
+      } catch (error) {
+        $('#message').text('유효하지 않은 keystore 파일입니다');
+        return;
+      }
+    }
   },
 
   handlePassword: async function () {
@@ -46,7 +73,15 @@ const App = {
   },
 
   checkValidKeystore: function (keystore) {
+    const parsedKeystore = JSON.parse(keystore);
+    // keystore 필수 요소 구성 확인
+    // 
+    const isValidKeystore = parsedKeystore.version &&
+      parsedKeystore.id &&
+      parsedKeystore.address &&
+      parsedKeystore.crypto
 
+    return isValidKeystore;
   },
 
   integrateWallet: function (privateKey) {
