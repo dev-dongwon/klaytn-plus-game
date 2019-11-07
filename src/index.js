@@ -1,7 +1,7 @@
 import Cave from "caver-js";
 
 const config = {
-  rpcURL: "http://api.baobab.klaytn.net:8651"
+  rpcURL: "https://api.baobab.klaytn.net:8651"
 }
 
 const cav = new Cave(config.rpcURL);
@@ -37,11 +37,19 @@ const App = {
   },
 
   handlePassword: async function () {
-
+    this.auth.password = event.target.value;
   },
 
   handleLogin: async function () {
-
+    if (this.auth.accessType === 'keystore') {
+      try {
+        // keystore, password를 decrpyt해 privatekey 가져오기
+        const privateKey = cav.klay.accounts.decrpyt(this.auth.keystore, this.auth.password).privateKey;
+        this.integrateWallet(privateKey);
+      } catch (error) {
+        $('#message').text('비밀번호가 일치히지 않습니다');
+      }
+    }
   },
 
   handleLogout: async function () {
@@ -84,8 +92,12 @@ const App = {
     return isValidKeystore;
   },
 
+  // private key로 wallet instance를 가져옴
   integrateWallet: function (privateKey) {
-
+    const walletInstance = cav.klay.accounts.privateKeyToAccount(privateKey);
+    cav.klay.accounts.wallet.add(walletInstance);
+    // session storage에 저장 => 계정 로그인 상태 유지
+    sessionStorage.setItem('walletInstance', JSON.stringify(walletInstance));
   },
 
   reset: function () {
