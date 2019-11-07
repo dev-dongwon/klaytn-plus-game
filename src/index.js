@@ -44,7 +44,7 @@ const App = {
     if (this.auth.accessType === 'keystore') {
       try {
         // keystore, password를 decrpyt해 privatekey 가져오기
-        const privateKey = cav.klay.accounts.decrpyt(this.auth.keystore, this.auth.password).privateKey;
+        const privateKey = cav.klay.accounts.decrypt(this.auth.keystore, this.auth.password).privateKey;
         this.integrateWallet(privateKey);
       } catch (error) {
         $('#message').text('비밀번호가 일치히지 않습니다');
@@ -98,6 +98,7 @@ const App = {
     cav.klay.accounts.wallet.add(walletInstance);
     // session storage에 저장 => 계정 로그인 상태 유지
     sessionStorage.setItem('walletInstance', JSON.stringify(walletInstance));
+    this.changeUI(walletInstance);
   },
 
   reset: function () {
@@ -105,7 +106,12 @@ const App = {
   },
 
   changeUI: async function (walletInstance) {
-
+    // login 관련 UI interface 숨기기
+    $('#loginModal').modal('hide');
+    $('#login').hide();
+    // login 후 보여야 할 ui interface
+    $('#logout').show();
+    $('#address').append(`<br><p>내 계정 주소: ${walletInstance.address}<p>`);
   },
 
   removeWallet: function () {
