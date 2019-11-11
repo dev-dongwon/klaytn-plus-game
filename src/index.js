@@ -5,6 +5,9 @@ const config = {
 }
 
 const cav = new Cave(config.rpcURL);
+// webpack 빌드할 때 파일을 읽고 전역 상수로 설정
+// 이런것도 있구만.. 숙지하자
+const agContract = new cav.klay.Contract(DEPLOYED_ABI, DEPLOYED_ADDRESS);
 
 const App = {
   auth: {
@@ -76,19 +79,52 @@ const App = {
   },
 
   deposit: async function () {
+    const walletInstance = this.getWallet();
+    // wallet이 존재하면
+    if (walletInstance) {
+      // 값이 다르면 바로 리턴
+      if (await this.callOwner() !== walletInstance.address) return;
 
+      const amount = $('#amount').val();
+
+      if (amount) {
+        // send 인자로 
+        agContract.methods.deposit().send({
+            // from : 계정 인증이 완료된 주소만 값으로 쓸 수 있음
+            from: walletInstance.address,
+            gas: '250000',
+            value: cav.utils.toPeb(amount, "KLAY")
+          })
+          .once('transactionHash', (txHash) => {
+            console.log(`txHash: ${txHash}`);
+          })
+          // 영수증을 받을 수 있으면 트랜잭션에 성공
+          .once('receipt', (receipt) => {
+            console.log(`${receipt.blockNumber}`)
+            alert(`${amount} KLAY를 컨트랙에 송금했습니다`)
+            location.reload();
+          })
+          .once('error', (error) => {
+            alert(error.message);
+          })
+      }
+      return;
+    }
   },
 
   callOwner: async function () {
-
+    return await agContract.methods.owner().call();
   },
 
   callContractBalance: async function () {
-
+    return await agContract.methods.getBalance().call();
   },
 
   getWallet: function () {
-
+    if (cav.klay.accounts.wallet.length) {
+      // 지금 내가 로그인 되어 있는 계정 월렛 가져오기
+      return cav.klay.accounts.wallet[0];
+    }
   },
 
   checkValidKeystore: function (keystore) {
@@ -126,6 +162,16 @@ const App = {
     // login 후 보여야 할 ui interface
     $('#logout').show();
     $('#address').append(`<br><p>내 계정 주소: ${walletInstance.address}<p>`);
+
+    // 잔액 표시 dom 추가
+    // cav.utils 부분은 peb을 klay 단위로 변환해줌
+    $('#contractBalance')
+    .append(`<p>이벤트 잔액: ${cav.utils.fromPeb(await this.callContractBalance(), "KLAY") + "KLAY"}<p>`);
+
+    // owner div는 이벤트 주최자만 볼 수 있도록
+    if (await this.callOwner() === walletInstance.address) {
+      $("#owner").show();
+    }
   },
 
   removeWallet: function () {
