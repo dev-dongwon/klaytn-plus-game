@@ -13,8 +13,18 @@ const App = {
     password: ''
   },
 
+  // session storage에 저장된 wallet 불러옴
   start: async function () {
-
+    const walletFromSession = sessionStorage.getItem('walletInstance');
+    // 값이 있으면
+    if (walletFromSession) {
+      try {
+        cav.klay.accounts.wallet.add(JSON.parse(walletFromSession));
+        this.changeUI(JSON.parse(walletFromSession));
+      } catch (error) {
+        sessionStorage.removeItem('walletInstance');
+      }
+    }
   },
 
   handleImport: async function () {
