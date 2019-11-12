@@ -72,7 +72,15 @@ const App = {
   },
 
   generateNumbers: async function () {
+    const num1 = Math.floor((Math.random()*50) + 10);
+    const num2 = Math.floor((Math.random()*50) + 10);
+    sessionStorage.setItem('result', num1 + num2);
 
+    $('#start').hide();
+    $('#num1').text(num1);
+    $('#num2').text(num2);
+    $('#question').show();
+    document.querySelector('#answer').focus();
   },
 
   submitAnswer: async function () {
@@ -165,7 +173,7 @@ const App = {
     // login 후 보여야 할 ui interface
     $('#logout').show();
     $('#address').append(`<br><p>내 계정 주소: ${walletInstance.address}<p>`);
-
+    $('#game').show();
     // 잔액 표시 dom 추가
     // cav.utils 부분은 peb을 klay 단위로 변환해줌
     $('#contractBalance')
