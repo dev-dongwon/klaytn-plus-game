@@ -1,5 +1,7 @@
 import Cave from "caver-js";
-import { Spinner } from "spin.js";
+import {
+  Spinner
+} from "spin.js";
 
 const config = {
   rpcURL: "https://api.baobab.klaytn.net:8651"
@@ -72,8 +74,8 @@ const App = {
   },
 
   generateNumbers: async function () {
-    const num1 = Math.floor((Math.random()*50) + 10);
-    const num2 = Math.floor((Math.random()*50) + 10);
+    const num1 = Math.floor((Math.random() * 50) + 10);
+    const num2 = Math.floor((Math.random() * 50) + 10);
     sessionStorage.setItem('result', num1 + num2);
 
     $('#start').hide();
@@ -81,6 +83,8 @@ const App = {
     $('#num2').text(num2);
     $('#question').show();
     document.querySelector('#answer').focus();
+
+    this.showTimer();
   },
 
   submitAnswer: async function () {
@@ -177,7 +181,7 @@ const App = {
     // 잔액 표시 dom 추가
     // cav.utils 부분은 peb을 klay 단위로 변환해줌
     $('#contractBalance')
-    .append(`<p>이벤트 잔액: ${cav.utils.fromPeb(await this.callContractBalance(), "KLAY") + "KLAY"}<p>`);
+      .append(`<p>이벤트 잔액: ${cav.utils.fromPeb(await this.callContractBalance(), "KLAY") + "KLAY"}<p>`);
 
     // owner div는 이벤트 주최자만 볼 수 있도록
     if (await this.callOwner() === walletInstance.address) {
@@ -195,7 +199,20 @@ const App = {
   },
 
   showTimer: function () {
-
+    let seconds = 3;
+    $('#timer').text(seconds);
+    
+    const interval = setInterval(() => {
+      $("#timer").text(--seconds);
+      // 3초가 지나면 초기화
+      if (seconds <= 0) {
+        $('#timer').text("");
+        $("#answer").val("");
+        $("#question").hide();
+        $("#start").show();
+        clearInterval(interval);
+      }
+    }, 1000);
   },
 
   showSpinner: function () {
